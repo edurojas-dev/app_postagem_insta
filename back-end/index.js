@@ -5,6 +5,7 @@ const morgan = require('morgan')
 const bodyParser = require('body-parser')
 const connection = require("./database/database")
 const Postagem = require("./database/Postagem")
+const cors = require("cors")
 
 //database
 connection.authenticate()
@@ -19,11 +20,25 @@ connection.authenticate()
 app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({extended: false}))
 app.use(bodyParser.json())
+app.use(cors())
 
 app.get("/", (req, res) =>{
-    res.json({
-        status: "API running!",
-        description: "Aplicação de postagem para Instagram"
+    // res.json({
+    //     status: "API running!",
+    //     description: "Aplicação de postagem para Instagram"
+    // })
+
+    Postagem.findAll({raw:true}).then( postagens => {
+        res.json(postagens)
+    })
+})
+
+app.get("/delete/postagem/:id", (req, res) =>{
+    var id = req.params.id
+    Postagem.destroy({
+        where: {id: id}
+    }).then((p)=>{
+        console.log("Deletando: " + p)
     })
 })
 
